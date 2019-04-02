@@ -1,35 +1,28 @@
 /*
 Author:  Lee Morgan
-Last updated:  January 28, 2019
+Last updated:  March 31, 2019
 
 Some common functions for the Euler Project
 */
-var startTime = process.hrtime();
 
-var arr = primes(664579);
-console.log("last prime:  "  + arr[arr.length-1]);
-console.log("length  " + arr.length);
-
-var endTime = process.hrtime(startTime);
-console.info("Time:  %ds %dms", endTime[0], endTime[1] / 1000000);
-
-function primeList(count){
-    var arr =[2];
-    for(var i = 3; i <= count; i+=2){
-        arr.push(i);
-    }
-
-    for(var i = 0; i < arr.length; i++){
-        for(var j = i+1; j < arr.length; j++){
-            if(arr[j] % arr[i] === 0){
-                arr.splice(j, 1);
+//Creates an array of primes smaller than 'max'
+//Uses the Sieve of Erastosthenes
+function getPrimes(max) {
+    var sieve = []; 
+    var primes = [];
+    for (var i = 2; i <= max; ++i) {
+        if (!sieve[i]) {
+            // i has not been marked -- it is prime
+            primes.push(i);
+            for (var j = i << 1; j <= max; j += i) {
+                sieve[j] = true;
             }
         }
     }
-
-    return arr;
+    return primes;
 }
 
+//Creates an array of primes, size of 'count'
 function primes(count){
     var arr = [2];
     var num = 3;
@@ -52,16 +45,36 @@ function primes(count){
     return arr;
 }
 
-function getPrimes(max) {
-    var sieve = [], i, j, primes = [];
-    for (i = 2; i <= max; ++i) {
-        if (!sieve[i]) {
-            // i has not been marked -- it is prime
-            primes.push(i);
-            for (j = i << 1; j <= max; j += i) {
-                sieve[j] = true;
+//returns an array containing the prime factors of any number
+function primeFactorization(num){
+    //0 and 1 cannot be factored
+    if(num === 1 || num === 0){
+        throw "Does not have a prime factorization";
+    }
+    var primesArr = getPrimes(num);
+    var factorization = [];
+    var isPrime = false
+
+    //If num = last num in array, it is already prime
+    if(primesArr[primesArr.length - 1] === num){
+        isPrime = true;
+        factorization.push(num);
+    }
+    
+    //If not prime, factor the integer until it is prime
+    while(!isPrime){
+        for(var i = 0; i < primesArr.length - 1; i++){
+            if(num % primesArr[i] === 0){
+                factorization.push(primesArr[i]);
+                num /= primesArr[i];
+                break;
             }
         }
+        isPrime = primesArr.every(function(prime){
+            return num % prime !== 0;
+        });
     }
-    return primes;
+    return factorization;
 }
+
+module.exports = {primeFactorization};
